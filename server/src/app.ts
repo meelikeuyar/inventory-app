@@ -29,7 +29,10 @@ app.use(requestLogger);
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false });
 app.use('/api/', limiter);
 
-// ── Routes ──
+// ── Public routes (no auth) ──
+app.use('/api', healthRouter);
+
+// ── Authenticated routes ──
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/projects', siteRoutes);
@@ -40,8 +43,7 @@ app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/insights', insightsRoutes);
 app.use('/api', docsRoutes);
 app.use('/api', metricsRoutes);
-app.use('/api', globalRoutes);      // authenticated: inventory, activity, dashboard, search, filter-options
-app.use('/api', healthRouter);      // public: health check
+app.use('/api', globalRoutes);
 
 // ── Error handling ──
 app.use(errorHandler);
