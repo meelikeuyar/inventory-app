@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
-import { setupTestDB, teardownTestDB, clearTestDB } from './setup';
+import { setupTestDB, teardownTestDB, clearTestDB, createAdminAndGetToken } from './setup';
 import app from '../app';
 
 describe('Authorization Tests', () => {
@@ -16,17 +16,21 @@ describe('Authorization Tests', () => {
     await clearTestDB();
   });
 
-  const adminUser = { email: 'admin@test.com', password: 'Admin123', fullName: 'Admin User' };
   const engineerUser = { email: 'engineer@test.com', password: 'Engineer123', fullName: 'Engineer User' };
   const viewerUser = { email: 'viewer@test.com', password: 'Viewer123', fullName: 'Viewer User' };
 
-  async function registerAndGetToken(user: typeof adminUser, role?: string) {
-    const res = await request(app).post('/api/auth/register').send(user);
+  async function registerAndGetToken(user: typeof engineerUser, role?: string) {
+    const admin = await createAdminAndGetToken();
+
+    // Admin registers the user
+    const res = await request(app)
+      .post('/api/auth/register')
+      .set('Authorization', `Bearer ${admin.accessToken}`)
+      .send(user);
+
     if (role && role !== 'engineer') {
-      // Directly update role in DB for testing
       const { User } = await import('../models/User');
       await User.findByIdAndUpdate(res.body.user.id, { role });
-      // Re-login to get token with updated role
       const loginRes = await request(app).post('/api/auth/login').send({ email: user.email, password: user.password });
       return loginRes.body.accessToken;
     }
@@ -43,19 +47,19 @@ describe('Authorization Tests', () => {
   });
 
   it('admin should be able to create a project', async () => {
-    const token = await registerAndGetToken(adminUser, 'admin');
+    const admin = await createAdminAndGetToken();
     const res = await request(app)
       .post('/api/projects')
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${admin.accessToken}`)
       .send({ name: 'Test Project' });
     expect(res.status).toBe(201);
   });
 
   it('engineer should NOT be able to delete a project', async () => {
-    const adminToken = await registerAndGetToken(adminUser, 'admin');
+    const admin = await createAdminAndGetToken();
     const projRes = await request(app)
       .post('/api/projects')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Authorization', `Bearer ${admin.accessToken}`)
       .send({ name: 'To Delete' });
 
     const engToken = await registerAndGetToken(engineerUser, 'engineer');

@@ -28,3 +28,24 @@ export async function clearTestDB() {
     await collections[key].deleteMany({});
   }
 }
+
+/**
+ * Creates an admin user directly in DB and returns its JWT token.
+ * Use this in tests that need to call admin-only endpoints (like register).
+ */
+export async function createAdminAndGetToken() {
+  const { User } = await import('../models/User');
+  const { generateAccessToken, generateRefreshToken } = await import('../utils/token');
+
+  const admin = await User.create({
+    email: `admin-${Date.now()}@test.com`,
+    password: 'AdminTest123',
+    fullName: 'Test Admin',
+    role: 'admin',
+  });
+
+  const accessToken = generateAccessToken({ userId: admin.id, role: admin.role });
+  const refreshToken = generateRefreshToken({ userId: admin.id, role: admin.role });
+
+  return { accessToken, refreshToken, user: admin };
+}

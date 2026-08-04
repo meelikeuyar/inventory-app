@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
-import { setupTestDB, teardownTestDB, clearTestDB } from './setup';
+import { setupTestDB, teardownTestDB, clearTestDB, createAdminAndGetToken } from './setup';
 import app from '../app';
 
 describe('Bulk Operations Tests', () => {
@@ -21,17 +21,8 @@ describe('Bulk Operations Tests', () => {
   let siteId: string;
 
   async function setupProjectAndSite() {
-    // Register admin
-    const regRes = await request(app).post('/api/auth/register').send({
-      email: 'bulk@test.com', password: 'BulkTest123', fullName: 'Bulk Tester',
-    });
-    token = regRes.body.accessToken;
-
-    // Set admin role
-    const { User } = await import('../models/User');
-    await User.findByIdAndUpdate(regRes.body.user.id, { role: 'admin' });
-    const loginRes = await request(app).post('/api/auth/login').send({ email: 'bulk@test.com', password: 'BulkTest123' });
-    token = loginRes.body.accessToken;
+    const admin = await createAdminAndGetToken();
+    token = admin.accessToken;
 
     // Create project
     const projRes = await request(app)
@@ -78,7 +69,6 @@ describe('Bulk Operations Tests', () => {
   it('should bulk delete items', async () => {
     await setupProjectAndSite();
 
-    // Create items first
     const item1 = await request(app)
       .post(`/api/projects/${projectId}/sites/${siteId}/items`)
       .set('Authorization', `Bearer ${token}`)
