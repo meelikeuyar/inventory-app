@@ -88,9 +88,10 @@ jobs:
       - name: Build
         run: npm run build
 
-  # ── Docker Build (only on main) ──
   docker-build:
     name: Docker — Build & Verify
     runs-on: ubuntu-latest
     needs: [server-quality, server-test, client-quality]
     if: false
+    steps:
+      - uses: actions/checkout@v4
