@@ -69,7 +69,7 @@ const inventoryItemSchema = new Schema(
 inventoryItemSchema.pre('save', async function (next) {
   if (this.isNew && !this.assetId) {
     const year = new Date().getFullYear();
-    const counter = await Counter.findByIdAndUpdate('assetId', { $inc: { seq: 1 } }, { upsert: true, new: true });
+    const counter = await (Counter as any).findByIdAndUpdate('assetId', { $inc: { seq: 1 } }, { upsert: true, new: true });
     this.assetId = `AST-${year}-${String(counter.seq).padStart(6, '0')}`;
   }
   next();

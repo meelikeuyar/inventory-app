@@ -4,7 +4,7 @@ import { InventoryItem } from '../models/InventoryItem';
 import { AppError } from '../utils/AppError';
 import logger from '../utils/logger';
 
-export interface EnrichedProject extends Omit<IProject, keyof Document> {
+export interface EnrichedProject extends Omit<IProject, '_id'> {
   siteCount: number;
   itemCount: number;
 }

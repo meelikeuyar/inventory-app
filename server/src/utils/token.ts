@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 interface TokenPayload {
   userId: string;
@@ -6,15 +6,17 @@ interface TokenPayload {
 }
 
 export function generateAccessToken(payload: TokenPayload): string {
-  return jwt.sign(payload, process.env.JWT_SECRET!, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '15m',
-  });
+  const options: SignOptions = {
+    expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as any,
+  };
+  return jwt.sign(payload, process.env.JWT_SECRET!, options);
 }
 
 export function generateRefreshToken(payload: TokenPayload): string {
-  return jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, {
-    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
-  });
+  const options: SignOptions = {
+    expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
+  };
+  return jwt.sign(payload, process.env.JWT_REFRESH_SECRET!, options);
 }
 
 export function verifyAccessToken(token: string): TokenPayload {

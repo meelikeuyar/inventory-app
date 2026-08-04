@@ -75,7 +75,7 @@ export class InventoryService {
 
     const cleanData = pickFields(data, INVENTORY_UPDATABLE_FIELDS);
     const trackFields = [...INVENTORY_UPDATABLE_FIELDS];
-    const changes = auditService.diffFields(oldItem.toObject() as Record<string, unknown>, cleanData, trackFields);
+    const changes = auditService.diffFields(oldItem.toObject() as unknown as Record<string, unknown>, cleanData, trackFields);
     const item = await InventoryItem.findOneAndUpdate({ _id: itemId, site: verifiedSiteId }, cleanData, { new: true });
 
     if (changes.length > 0) {
@@ -125,11 +125,11 @@ export class InventoryService {
       ...pickFields(item, [...INVENTORY_UPDATABLE_FIELDS]),
       site: verifiedSiteId,
       addedBy: userId,
-    })).filter((d) => d.name && String(d.name).length > 0);
+    } as Record<string, unknown>)).filter((d) => d.name && String(d.name).length > 0);
 
     const created = await InventoryItem.insertMany(docs);
     for (const item of created) {
-      await auditService.log({ entityType: 'inventory', entityId: item.id, action: 'imported', userId, changes: [{ field: 'name', oldValue: '', newValue: item.name }] });
+      await auditService.log({ entityType: 'inventory', entityId: String(item.id), action: 'imported', userId, changes: [{ field: 'name', oldValue: '', newValue: String(item.name) }] });
     }
     invalidateCache(['/api/dashboard/stats*', '/api/filter-options*']);
     logger.info('Bulk import completed', { siteId: verifiedSiteId, userId, count: created.length });
@@ -160,7 +160,7 @@ export class InventoryService {
     const oldItems = await InventoryItem.find({ _id: { $in: itemIds }, site: verifiedSiteId });
     const result = await InventoryItem.updateMany({ _id: { $in: itemIds }, site: verifiedSiteId }, { $set: cleanUpdates });
     for (const oldItem of oldItems) {
-      const changes = auditService.diffFields(oldItem.toObject() as Record<string, unknown>, cleanUpdates, Object.keys(cleanUpdates));
+      const changes = auditService.diffFields(oldItem.toObject() as unknown as Record<string, unknown>, cleanUpdates, Object.keys(cleanUpdates));
       if (changes.length > 0) await auditService.log({ entityType: 'inventory', entityId: oldItem.id, action: 'bulk_updated', userId, changes, metadata: { bulkOperation: true } });
     }
     invalidateCache(['/api/dashboard/stats*', '/api/filter-options*']);
