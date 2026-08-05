@@ -12,8 +12,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "Node"
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/__tests__"]
