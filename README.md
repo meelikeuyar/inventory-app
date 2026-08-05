@@ -1,3 +1,11 @@
+Canli Demo: https://inventory-client-etya.onrender.com
+
+Demo Hesabi (sadece goruntuleme yetkisi):
+  E-posta: demo@inventorypro.com
+  Sifre: Demo1234
+
+---
+
 # Iventra -- Kurumsal Envanter Yonetim Sistemi
 
 TypeScript ile bastan sona gelistirilmis, cok katmanli mimariye sahip full-stack envanter yonetim platformu. Birden fazla proje ve veri merkezi sitesi uzerinden BT altyapi varliklarini yonetmek icin tasarlandi.
@@ -111,7 +119,7 @@ docker-compose.yml           Tam stack: server, client, MongoDB, Redis
 ### Yerel Gelistirme
 
 ```bash
-git clone https://github.com/KULLANICI_ADI/inventory-app.git
+git clone https://github.com/meelikeuyar/inventory-app.git
 cd inventory-app
 
 # MongoDB ve Redis'i Docker ile baslat
